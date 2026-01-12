@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>نظام تقييم أداء المعلمين — إصدار 1.0 </title>
+<title>نظام تقييم المعلمين — (الإصدار النهائي المصحح)</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -17,7 +17,28 @@
     margin:0;background:var(--bg);font-family:'Cairo',sans-serif;color:#071123;line-height:1.5;
     -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
   }
-  .container{max-width:1200px;margin:18px auto;padding:18px;}
+  
+  /* LOGIN SCREEN STYLES */
+  #loginScreen {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(135deg, var(--emerald), var(--emerald-dark));
+    z-index: 10000; display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+  }
+  .login-card {
+    background: #fff; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2); text-align: center;
+  }
+  .login-logo { font-size: 3rem; margin-bottom: 10px; }
+  .login-title { font-weight: 900; font-size: 1.4rem; color: var(--emerald-dark); margin-bottom: 20px; }
+  .login-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Cairo'; outline:none; transition:0.3s;}
+  .login-input:focus { border-color: var(--emerald); box-shadow: 0 0 0 3px rgba(25,135,84,0.1); }
+  .login-btn { width: 100%; padding: 12px; background: var(--emerald); color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+  .login-btn:hover { background: var(--emerald-dark); }
+  .login-error { color: var(--danger); font-size: 0.9rem; margin-top: 10px; display: none; font-weight:bold;}
+
+  /* MAIN APP STYLES */
+  .container{max-width:1200px;margin:18px auto;padding:18px; display:none;}
   .header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px;border-radius:var(--radius);
           background: linear-gradient(90deg,var(--emerald),var(--emerald-2));color:#fff;box-shadow: var(--shadow);}
   .header .title{font-weight:900;font-size:1.05rem;}
@@ -38,46 +59,52 @@
   .toast{position:fixed;top:18px;right:18px;padding:12px 16px;border-radius:10px;background: linear-gradient(90deg,var(--emerald),var(--emerald-2));color:#fff;font-weight:800;display:none;z-index:9999;box-shadow: 0 8px 28px rgba(15,81,50,0.12);}
   .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,8,0.45);display:none;align-items:center;justify-content:center;z-index:2000;}
   .modal{background:var(--card);padding:16px;border-radius:10px;max-width:760px;width:94%;box-shadow: 0 18px 44px rgba(10,25,18,0.06);}
-  @media(max-width:900px){ .row{flex-direction:column} .header{flex-direction:column;align-items:flex-start;gap:8px} }
-  /* 🔴 تخصيص مظهر checkbox ليعرض X باللون الأحمر */
-input[type="checkbox"] {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
-  border: 2px solid #bbb;
-  border-radius: 4px;
-  display: inline-block;
-  position: relative;
-  cursor: pointer;
-  vertical-align: middle;
-  margin-left: 6px;
-}
+  
+  /* Filter Box Style */
+  .filter-box { background: #f1f6f1; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #e0e0e0; }
+  .filter-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+  .filter-row > div { flex: 1; min-width: 150px; }
 
-input[type="checkbox"]:checked {
-  border-color: #d9534f; /* أحمر */
-  background-color: #ffe5e5;
-}
+  /* Checkboxes */
+  input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 24px; height: 24px; border: 2px solid #bbb; border-radius: 6px; display: inline-block; position: relative; cursor: pointer; vertical-align: middle; margin-left: 6px; background:#fff; transition: all 0.2s; }
+  input[type="checkbox"]:checked { border-color: #d9534f; background-color: #ffe5e5; }
+  input[type="checkbox"]:checked::after { content: "✖"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -52%); font-size: 16px; color: #d9534f; font-weight: bold; }
+  input[type="checkbox"].chk-positive:checked { border-color: var(--emerald); background-color: #e9f5ec; }
+  input[type="checkbox"].chk-positive:checked::after { content: "✔"; color: var(--emerald); font-size: 18px; }
 
-input[type="checkbox"]:checked::after {
-  content: "✖"; /* علامة X */
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -52%);
-  font-size: 14px;
-  color: #d9534f;
-  font-weight: bold;
-}
-
+  /* Print & Report */
+  .report-wrap { border:1px solid #eee; padding:20px; border-radius:8px; background:#fff; }
+  .report-header { display:flex; justify-content:space-between; border-bottom:2px solid var(--emerald); padding-bottom:15px; margin-bottom:15px; }
+  .school-info { font-size:0.9rem; color:#666; margin-bottom:5px; }
+  .report-title { font-size:1.4rem; font-weight:900; color:var(--emerald-dark); }
+  .kpi { display:flex; gap:15px; margin-top:10px; flex-wrap:wrap; }
+  .card-kpi { background:#f4f9f6; padding:10px 15px; border-radius:8px; text-align:center; min-width:100px; border:1px solid rgba(15,81,50,0.1); }
+  .section { margin-top:20px; }
+  .section h4 { border-right:4px solid var(--emerald); padding-right:10px; color:var(--emerald-dark); margin-bottom:10px; }
 </style>
 </head>
 <body>
-<div class="container">
+
+<!-- Login Screen -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">🎓</div>
+    <div class="login-title">تسجيل الدخول للنظام</div>
+    <input type="text" id="login_user" class="login-input" placeholder="اسم المستخدم (admin)">
+    <input type="password" id="login_pass" class="login-input" placeholder="كلمة المرور (123456)">
+    <button id="doLogin" class="login-btn">دخول</button>
+    <div id="loginError" class="login-error">بيانات الدخول غير صحيحة!</div>
+  </div>
+  <div style="margin-top:20px; color:rgba(255,255,255,0.7); font-size:0.9rem;">نظام تقييم أداء المعلمين © 2026</div>
+</div>
+
+<!-- Main App Container -->
+<div class="container" id="appContainer">
 
   <header class="header">
-    <div class="title">🎓 نظام تقييم أداء المعلمين — (الإصدار 1.0)</div>
+    <div class="title">🎓 نظام تقييم المعلمين</div>
     <div style="display:flex;gap:8px;align-items:center">
+      <button id="logoutBtn" class="btn danger" style="padding:6px 10px; font-size:0.9rem">خروج</button>
       <button id="backupTop" class="btn ghost">💾</button>
     </div>
   </header>
@@ -94,7 +121,7 @@ input[type="checkbox"]:checked::after {
     <button class="nav-btn" data-screen="fullReport">التقرير الشامل</button>
     <button class="nav-btn" data-screen="settings">الإعدادات</button>
     <button class="nav-btn" data-screen="teacherReport">📄 تقرير المعلم المفصّل</button>
-</nav>
+  </nav>
 
   <!-- Teachers -->
   <section id="teachers" class="card screen" style="display:none">
@@ -122,88 +149,56 @@ input[type="checkbox"]:checked::after {
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div>
         <h3>بنود التقييم</h3>
-        <div class="small">أضف بنود التقييم وحدد الحد الأقصى والنوع وقيمة الخصم لكل مقصر</div>
+        <div class="small">اضبط البنود (صح ✔ للحضور) أو (خطأ ✖ للمخالفات)</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <button id="restoreDefaults" class="btn ghost">🔄 استعادة البنود الافتراضية</button>
       </div>
     </div>
-
     <div style="margin-top:12px">
       <div class="row">
-        <div>
-          <label class="small">اسم البند</label>
-          <input id="ci_name" placeholder="مثال: التحضير">
-        </div>
-        <div>
-          <label class="small">الحد الأعلى</label>
-          <input id="ci_max" type="number" min="1" value="10">
-        </div>
-        <div>
-          <label class="small">نوع البند</label>
-          <select id="ci_kind">
-            <option value="daily">يومي</option>
-            <option value="weekly">أسبوعي</option>
-            <option value="monthly">شهري</option>
-          </select>
-        </div>
-        <div>
-          <label class="small">قيمة الخصم (لكل مقصر)</label>
-          <input id="ci_penalty" type="number" min="0" step="0.1" value="1">
-        </div>
+        <div><label class="small">اسم البند</label><input id="ci_name" placeholder="مثال: التحضير"></div>
+        <div><label class="small">الحد الأعلى</label><input id="ci_max" type="number" min="1" value="10"></div>
+        <div><label class="small">نوع البند</label><select id="ci_kind"><option value="daily">يومي</option><option value="weekly">أسبوعي</option><option value="monthly">شهري</option></select></div>
+        <div><label class="small">قيمة الخصم</label><input id="ci_penalty" type="number" min="0" step="0.1" value="1"></div>
       </div>
-      <div style="margin-top:8px"><button id="addCi" class="btn">➕ إضافة بند جديد</button></div>
-
-      <div style="margin-top:12px">
-        <table class="table" id="ci_table">
-          <thead>
-            <tr><th>اسم البند</th><th>الحد الأقصى</th><th>النوع</th><th>قيمة الخصم</th><th>عمليات</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <div style="margin-top:8px">
+        <label class="small">طريقة الاحتساب:</label>
+        <select id="ci_logic" style="background:#f0f8ff; border-color:#b0c4de;">
+          <option value="negative">تسجيل مخالفات (صح ✖ = خصم)</option>
+          <option value="positive">تسجيل حضور/التزام (صح ✔ = عدم خصم)</option>
+        </select>
       </div>
+      <div style="margin-top:12px"><button id="addCi" class="btn">➕ إضافة بند جديد</button></div>
+      <div style="margin-top:12px"><table class="table" id="ci_table"><thead><tr><th>اسم البند</th><th>الحد الأقصى</th><th>النوع</th><th>طريقة الاحتساب</th><th>الخصم</th><th>عمليات</th></tr></thead><tbody></tbody></table></div>
     </div>
   </section>
 
-  <!-- DAILY (معلمي صفوف + بنود أعمدة مع checkboxes) -->
+  <!-- DAILY -->
   <section id="daily" class="card screen" style="display:none">
     <h3>التقييم اليومي</h3>
-    <div class="small">اختر تاريخ الجلسة وحدد المعلمين المقصرين عبر مربعات الاختيار</div>
-    <div class="row" style="margin-top:8px">
-      <div><label class="small">التاريخ</label><input id="daily_date" type="date"></div>
-    </div>
-    <div style="margin-top:12px;overflow:auto">
-      <div id="daily_table_wrap"></div>
-    </div>
-    <div style="margin-top:10px;display:flex;gap:8px">
-      <button id="saveDaily" class="btn">تسجيل الجلسة (تطبيق الخصومات)</button>
-      <button id="clearDaily" class="btn ghost">مسح العروض</button>
-    </div>
-    <div style="margin-top:12px">
-      <table class="table" id="daily_sessions_table">
-        <thead id="daily_head"></thead><tbody id="daily_body"></tbody>
-      </table>
-    </div>
+    <div class="row" style="margin-top:8px; margin-bottom:12px"><div><label class="small">التاريخ</label><input id="daily_date" type="date"></div></div>
+    <div style="background:#fff; border:1px solid #eee; padding:10px; border-radius:8px;"><div id="daily_table_wrap"></div></div>
+    <div style="margin-top:15px;display:flex;gap:8px; border-top:1px solid #eee; padding-top:10px;"><button id="saveDaily" class="btn">💾 حفظ التقييم</button></div>
+    <div style="margin-top:20px"><h4 style="margin-bottom:5px; color:var(--emerald-dark)">سجل التقييمات السابقة (اليومية)</h4><table class="table" id="daily_sessions_table"><thead id="daily_head"></thead><tbody id="daily_body"></tbody></table></div>
   </section>
 
   <!-- WEEKLY -->
   <section id="weekly" class="card screen" style="display:none">
     <h3>التقييم الأسبوعي</h3>
-    <div class="small">اختر تاريخ الجلسة وحدد المقصرين</div>
-    <div class="row" style="margin-top:8px"><div><label class="small">التاريخ</label><input id="weekly_date" type="date"></div></div>
-    <div style="margin-top:12px;overflow:auto"><div id="weekly_table_wrap"></div></div>
-    <div style="margin-top:10px;display:flex;gap:8px"><button id="saveWeekly" class="btn">تسجيل الجلسة (تطبيق الخصومات)</button><button id="clearWeekly" class="btn ghost">مسح العروض</button></div>
-    <div style="margin-top:12px"><table class="table" id="weekly_sessions_table"><thead id="weekly_head"></thead><tbody id="weekly_body"></tbody></table></div>
+    <div class="row" style="margin-top:8px; margin-bottom:12px"><div><label class="small">التاريخ</label><input id="weekly_date" type="date"></div></div>
+    <div style="background:#fff; border:1px solid #eee; padding:10px; border-radius:8px;"><div id="weekly_table_wrap"></div></div>
+    <div style="margin-top:15px;display:flex;gap:8px; border-top:1px solid #eee; padding-top:10px;"><button id="saveWeekly" class="btn">💾 حفظ التقييم</button></div>
+    <div style="margin-top:20px"><h4 style="margin-bottom:5px; color:var(--emerald-dark)">سجل التقييمات السابقة (الأسبوعية)</h4><table class="table" id="weekly_sessions_table"><thead id="weekly_head"></thead><tbody id="weekly_body"></tbody></table></div>
   </section>
 
   <!-- MONTHLY -->
   <section id="monthly" class="card screen" style="display:none">
     <h3>التقييم الشهري</h3>
-    <div class="small">اختر تاريخ الجلسة وحدد المقصرين</div>
-    <div class="row" style="margin-top:8px"><div><label class="small">التاريخ</label><input id="monthly_date" type="date"></div></div>
-    <div style="margin-top:12px;overflow:auto"><div id="monthly_table_wrap"></div></div>
-    <div style="margin-top:10px;display:flex;gap:8px"><button id="saveMonthly" class="btn">تسجيل الجلسة (تطبيق الخصومات)</button><button id="clearMonthly" class="btn ghost">مسح العروض</button></div>
-    <div style="margin-top:12px"><table class="table" id="monthly_sessions_table"><thead id="monthly_head"></thead><tbody id="monthly_body"></tbody></table></div>
+    <div class="row" style="margin-top:8px; margin-bottom:12px"><div><label class="small">التاريخ</label><input id="monthly_date" type="date"></div></div>
+    <div style="background:#fff; border:1px solid #eee; padding:10px; border-radius:8px;"><div id="monthly_table_wrap"></div></div>
+    <div style="margin-top:15px;display:flex;gap:8px; border-top:1px solid #eee; padding-top:10px;"><button id="saveMonthly" class="btn">💾 حفظ التقييم</button></div>
+    <div style="margin-top:20px"><h4 style="margin-bottom:5px; color:var(--emerald-dark)">سجل التقييمات السابقة (الشهرية)</h4><table class="table" id="monthly_sessions_table"><thead id="monthly_head"></thead><tbody id="monthly_body"></tbody></table></div>
   </section>
 
   <!-- Attendance -->
@@ -215,16 +210,8 @@ input[type="checkbox"]:checked::after {
       <div><label class="small">وقت الحضور</label><input id="att_arrival" type="time" value="07:00"></div>
       <div><label class="small">وقت الانصراف</label><input id="att_leave" type="time" value="13:25"></div>
     </div>
-    <div style="margin-top:8px">
-      <button id="saveAttendance" class="btn">حفظ (يحسب الخصم تلقائيًا)</button>
-      <button id="clearAttendance" class="btn ghost">مسح الكل</button>
-    </div>
-    <div style="margin-top:12px">
-      <table class="table" id="attendance_table">
-        <thead><tr><th>المعلم</th><th>التاريخ</th><th>الحضور</th><th>الانصراف</th><th>تأخر</th><th>انصراف مبكر</th><th>خصم</th><th>حذف</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    <div style="margin-top:8px"><button id="saveAttendance" class="btn">حفظ</button><button id="clearAttendance" class="btn ghost">مسح الكل</button></div>
+    <div style="margin-top:12px"><table class="table" id="attendance_table"><thead><tr><th>المعلم</th><th>التاريخ</th><th>الحضور</th><th>الانصراف</th><th>تأخر</th><th>انصراف مبكر</th><th>خصم</th><th>حذف</th></tr></thead><tbody></tbody></table></div>
   </section>
 
   <!-- Absences -->
@@ -234,23 +221,23 @@ input[type="checkbox"]:checked::after {
     <div class="row" style="margin-top:8px">
       <div><label class="small">التاريخ</label><input id="abs_date" type="date"></div>
       <div><label class="small">النوع</label><select id="abs_type"><option value="excused">بعذر</option><option value="unexcused">بدون عذر</option></select></div>
-      <div id="abs_penalty_wrap" style="display:none"><label class="small">قيمة الخصم</label><input id="abs_penalty" type="number" min="0" step="0.5"></div>
+      <div><label class="small" style="color:var(--danger)">قيمة الخصم</label><input id="abs_penalty" type="number" min="0" step="0.5" value="0"></div>
     </div>
-    <div style="margin-top:8px">
-      <button id="saveAbsence" class="btn">حفظ الغياب</button>
-      <button id="clearAbsence" class="btn ghost">مسح الكل</button>
-    </div>
-    <div style="margin-top:12px">
-      <table class="table" id="absence_table">
-        <thead><tr><th>المعلم</th><th>التاريخ</th><th>النوع</th><th>خصم</th><th>حذف</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    <div style="margin-top:8px"><button id="saveAbsence" class="btn">حفظ الغياب</button><button id="clearAbsence" class="btn ghost">مسح الكل</button></div>
+    <div style="margin-top:12px"><table class="table" id="absence_table"><thead><tr><th>المعلم</th><th>التاريخ</th><th>النوع</th><th>خصم</th><th>حذف</th></tr></thead><tbody></tbody></table></div>
   </section>
 
   <!-- Summary Report -->
   <section id="summaryReport" class="card screen" style="display:none">
     <h3>📊 التقرير المختصر</h3>
+    <div class="filter-box">
+        <div class="small" style="margin-bottom:5px;font-weight:bold">تحديد الفترة (اتركها فارغة لعرض الكل):</div>
+        <div class="filter-row">
+            <div><label class="small">من تاريخ</label><input type="date" id="summary_start"></div>
+            <div><label class="small">إلى تاريخ</label><input type="date" id="summary_end"></div>
+            <div><button id="btnFilterSummary" class="btn" style="width:100%">عرض التقرير</button></div>
+        </div>
+    </div>
     <div class="small" id="reportDate" style="margin-bottom:10px;"></div>
     <table class="table">
       <thead id="summary_head"></thead>
@@ -259,15 +246,58 @@ input[type="checkbox"]:checked::after {
     <div id="bestTeacher" style="margin-top:10px;font-weight:bold;font-size:1.1rem;color:var(--emerald-dark);"></div>
     <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
       <button id="exportExcel" class="btn">📥 تصدير Excel</button>
-      <button id="exportPdf" class="btn ghost">🧾 تصدير PDF</button>
     </div>
   </section>
 
   <!-- Full report -->
   <section id="fullReport" class="card screen" style="display:none">
     <h3>التقرير الشامل</h3>
+    <div class="filter-box">
+        <div class="small" style="margin-bottom:5px;font-weight:bold">تحديد الفترة (اتركها فارغة لعرض الكل):</div>
+        <div class="filter-row">
+            <div><label class="small">من تاريخ</label><input type="date" id="full_start"></div>
+            <div><label class="small">إلى تاريخ</label><input type="date" id="full_end"></div>
+            <div><button id="btnFilterFull" class="btn" style="width:100%">عرض التقرير</button></div>
+        </div>
+    </div>
     <div style="margin-top:12px"><table class="table" id="full_table"><thead id="full_head"></thead><tbody id="full_body"></tbody><tfoot id="full_foot"></tfoot></table></div>
     <div style="margin-top:12px"><button id="printFull" class="btn ghost">🖨️ طباعة</button></div>
+  </section>
+
+  <!-- Teacher Report Detailed -->
+  <section id="teacherReport" class="card screen" style="display:none">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px"><label class="small">اختر معلماً</label><select id="report_teacher_select"></select></div>
+    </div>
+    <div class="filter-box" style="margin-top:10px">
+        <div class="small" style="margin-bottom:5px;font-weight:bold">تحديد فترة التقرير:</div>
+        <div class="filter-row">
+            <div><label class="small">من تاريخ</label><input type="date" id="report_start"></div>
+            <div><label class="small">إلى تاريخ</label><input type="date" id="report_end"></div>
+            <div><button id="showReport" class="btn" style="width:100%">عرض التقرير</button></div>
+        </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
+      <button id="printReport" class="btn ghost">طباعة</button>
+    </div>
+
+    <div id="reportContainer" style="margin-top:18px;display:none">
+      <div class="report-wrap" id="reportPrintArea">
+        <div class="report-header">
+          <div>
+            <div class="school-info">نظام تقييم المعلمين</div>
+            <div class="report-title" id="r_teacher_name"></div>
+            <div class="muted" id="r_teacher_meta"></div>
+            <div class="muted small" id="r_period_info"></div>
+          </div>
+          <div class="kpi" id="r_kpis"></div>
+        </div>
+        <div class="section"><h4>الملخص التنفيذي</h4><div id="r_summary_text" class="muted"></div></div>
+        <div class="section"><h4>تفاصيل الأداء</h4><div id="r_details_tables"></div></div>
+        <div class="section"><h4>الحضور والغياب</h4><div id="r_attendance_table"></div><div id="r_absence_table" style="margin-top:8px"></div></div>
+        <div class="section"><h4>سجلات الجلسات</h4><div id="r_sessions_list" class="muted"></div></div>
+      </div>
+    </div>
   </section>
 
   <!-- Settings -->
@@ -280,7 +310,11 @@ input[type="checkbox"]:checked::after {
     </div>
     <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
       <button id="backup" class="btn">💾 تنزيل نسخة احتياطية</button>
+      
+      <!-- Hidden file input for restore -->
+      <input type="file" id="restoreFile" accept=".json" style="display:none">
       <button id="restore" class="btn ghost">📤 استعادة نسخة</button>
+      
       <button id="resetAll" class="btn danger">🧹 إعادة ضبط النظام بالكامل</button>
     </div>
   </section>
@@ -304,45 +338,37 @@ input[type="checkbox"]:checked::after {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script>
-/* ====== index27_full24_v3 — سكربت مُصلح ====== */
 (function(){
-const STORAGE = 'index27_v2_state_v3';
+const STORAGE = 'index27_v4_date_filters_fix_restore';
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = '123456';
+
 let state = {
-  teachers: [],
-  criteria: [],
-  evaluations: [],
-  deductions: [],
-  attendance: [],
-  absences: [],
+  teachers: [], criteria: [], evaluations: [], deductions: [], attendance: [], absences: [],
   official: {start:'07:00', end:'13:25', maxAttendancePenalty:2}
 };
+let uiState = { daily: null, weekly: null, monthly: null };
 
 const DEFAULT_CRITERIA = [
-  {id:'c_daily_1',name:'الطابور الصباحي',kind:'daily',max:10,penalty:1},
-  {id:'c_daily_2',name:'الإلتزام بتوقيت الحصص',kind:'daily',max:10,penalty:1},
-  {id:'c_daily_3',name:'الزي الرسمي',kind:'daily',max:10,penalty:0.5},
-  {id:'c_week_1',name:'التحضير الأسبوعي',kind:'weekly',max:10,penalty:1},
-  {id:'c_week_2',name:'سجل المتابعة',kind:'weekly',max:10,penalty:1},
-  {id:'c_week_3',name:'مناوبة الفسحة',kind:'weekly',max:10,penalty:1},
-  {id:'c_week_4',name:'مناوبة الصلاة',kind:'weekly',max:10,penalty:1},
-  {id:'c_month_1',name:'المشاركة في الإذاعة',kind:'monthly',max:10,penalty:1}
-
+  {id:'c_daily_1',name:'الطابور الصباحي',kind:'daily',max:10,penalty:1, logic:'positive'},
+  {id:'c_daily_2',name:'الإلتزام بتوقيت الحصص',kind:'daily',max:10,penalty:1, logic:'negative'},
+  {id:'c_daily_3',name:'الزي الرسمي',kind:'daily',max:10,penalty:0.5, logic:'negative'},
+  {id:'c_week_1',name:'التحضير الأسبوعي',kind:'weekly',max:10,penalty:1, logic:'negative'},
+  {id:'c_week_2',name:'سجل المتابعة',kind:'weekly',max:10,penalty:1, logic:'negative'},
+  {id:'c_week_3',name:'مناوبة الفسحة',kind:'weekly',max:10,penalty:1, logic:'negative'},
+  {id:'c_week_4',name:'مناوبة الصلاة',kind:'weekly',max:10,penalty:1, logic:'negative'},
+  {id:'c_month_1',name:'المشاركة في الإذاعة',kind:'monthly',max:10,penalty:1, logic:'negative'}
 ];
 
-function save(){ try{ localStorage.setItem(STORAGE, JSON.stringify(state)); }catch(e){ console.error('Save failed', e); } }
+function save(){ try{ localStorage.setItem(STORAGE, JSON.stringify(state)); }catch(e){ console.error(e); } }
 function load(){
   const raw = localStorage.getItem(STORAGE);
-  if(raw){
-    try{ state = JSON.parse(raw); }
-    catch(e){ state.criteria = DEFAULT_CRITERIA.slice(); }
-  }
+  if(raw){ try{ state = JSON.parse(raw); } catch(e){ state.criteria = DEFAULT_CRITERIA.slice(); } }
   if(!Array.isArray(state.criteria) || state.criteria.length===0) state.criteria = DEFAULT_CRITERIA.slice();
   if(!Array.isArray(state.teachers)) state.teachers = [];
   if(!Array.isArray(state.deductions)) state.deductions = [];
-  if(!Array.isArray(state.evaluations)) state.evaluations = [];
   save();
 }
-
 function uid(p='id'){ return p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 function el(q){ return document.querySelector(q); }
 function els(q){ return Array.from(document.querySelectorAll(q)); }
@@ -351,7 +377,19 @@ function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,
 function minutesBetween(t1,t2){ if(!t1||!t2) return 0; const a=t1.split(':').map(Number); const b=t2.split(':').map(Number); return (b[0]*60+b[1]) - (a[0]*60+a[1]); }
 function confirmModal(msg){ return new Promise(res=>{ const md=document.getElementById('confirmModal'); if(!md) return res(false); document.getElementById('modalMessage').textContent=msg; md.style.display='flex'; const ok=document.getElementById('modalOk'), cancel=document.getElementById('modalCancel'); function cleanup(){ md.style.display='none'; ok.removeEventListener('click', onok); cancel.removeEventListener('click', oncancel); } function onok(){ cleanup(); res(true); } function oncancel(){ cleanup(); res(false); } ok.addEventListener('click', onok); cancel.addEventListener('click', oncancel); }); }
 
-/* ---------- Teachers ---------- */
+/* --- Date Helper --- */
+function isDateInRange(dateStr, start, end) {
+    if(!dateStr) return false;
+    const d = new Date(dateStr); d.setHours(0,0,0,0);
+    const s = start ? new Date(start) : null; if(s) s.setHours(0,0,0,0);
+    const e = end ? new Date(end) : null; if(e) e.setHours(0,0,0,0);
+
+    if(s && d < s) return false;
+    if(e && d > e) return false;
+    return true;
+}
+
+/* Teachers */
 function renderTeachers(){
   const tbody = el('#teachersTable tbody'); if(!tbody) return; tbody.innerHTML='';
   state.teachers.forEach(t=>{
@@ -362,16 +400,14 @@ function renderTeachers(){
     tbody.appendChild(tr);
   });
   els('.editTeacher').forEach(b=> b.addEventListener('click', e=> startEditTeacher(e.currentTarget.dataset.id)));
-  els('[data-act="delTeacher"]').forEach(b=> b.addEventListener('click', async e=>{
-    const id = e.currentTarget.dataset.id; const ok = await confirmModal('هل تريد حذف المعلم وكل سجلاته؟'); if(!ok) return;
-    deleteTeacher(id);
-  }));
+  els('[data-act="delTeacher"]').forEach(b=> b.addEventListener('click', async e=>{ if(await confirmModal('حذف المعلم؟')) deleteTeacher(e.currentTarget.dataset.id); }));
 }
 function addTeacher(){
   const name = el('#t_name').value.trim(); const id = el('#t_id').value.trim(); const subject = el('#t_subject').value.trim();
-  if(!name||!id){ alert('ادخل اسم ورقم المعلم'); return; }
+  if(!name||!id){ alert('ادخل البيانات'); return; }
   if(state.teachers.some(t=>t.id===id)){ alert('الرقم موجود'); return; }
-  state.teachers.push({id,name,subject}); save(); renderTeachers(); populateSelects(); el('#t_name').value=''; el('#t_id').value=''; el('#t_subject').value=''; toast('تم إضافة المعلم');
+  state.teachers.push({id,name,subject}); save(); renderTeachers(); populateSelects(); el('#t_name').value=''; el('#t_id').value='';
+  toast('تم إضافة المعلم');
 }
 function startEditTeacher(id){
   const t = state.teachers.find(x=> x.id===id); if(!t) return;
@@ -381,657 +417,348 @@ function startEditTeacher(id){
 function saveEditTeacher(id){
   const t = state.teachers.find(x=> x.id===id); if(!t) return;
   t.name = el('#t_name').value.trim(); t.subject = el('#t_subject').value.trim(); save();
-  renderTeachers(); populateSelects();
-  el('#addTeacher').textContent='إضافة معلّم'; el('#addTeacher').onclick = addTeacher;
-  el('#t_name').value=''; el('#t_id').value=''; el('#t_subject').value='';
-  toast('تم حفظ التعديل');
+  renderTeachers(); populateSelects(); el('#addTeacher').textContent='إضافة معلّم'; el('#addTeacher').onclick = addTeacher;
+  el('#t_name').value=''; el('#t_id').value=''; el('#t_subject').value=''; toast('تم التعديل');
 }
 function deleteTeacher(id){
   state.teachers = state.teachers.filter(t=> t.id!==id);
   state.deductions = state.deductions.filter(d=> d.teacherId !== id);
-  state.evaluations = state.evaluations.filter(e=> {
-    if(!e.deductionIds) return true;
-    e.deductionIds = e.deductionIds.filter(i => {
-      const d = state.deductions.find(dd => dd.id === i);
-      return !!d;
-    });
-    return e.deductionIds.length > 0;
-  });
-  state.attendance = state.attendance.filter(a=> a.teacherId !== id);
-  state.absences = state.absences.filter(a=> a.teacherId !== id);
   save(); renderTeachers(); populateSelects(); renderAllTables(); toast('تم الحذف');
 }
 
-/* ---------- Criteria (مع قيمة الخصم) ---------- */
+/* Criteria */
 function renderCriteria(){
   const tbody = el('#ci_table tbody'); if(!tbody) return; tbody.innerHTML='';
   (state.criteria||[]).forEach(c=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${escapeHtml(c.name)}</td><td class="center">${c.max}</td><td>${escapeHtml(c.kind)}</td><td class="center">${c.penalty}</td>
-      <td><button class="btn ghost editCi" data-id="${c.id}">تعديل</button> <button class="btn" data-id="${c.id}" data-act="delCi" style="background:var(--danger);color:#fff">حذف</button></td>`;
+    let logicText = (c.logic === 'positive') ? '<span style="color:var(--emerald);font-weight:bold">✔ رصد حضور</span>' : '<span style="color:var(--danger)">✖ رصد مخالفة</span>';
+    tr.innerHTML = `<td>${escapeHtml(c.name)}</td><td class="center">${c.max}</td><td>${escapeHtml(c.kind)}</td><td class="center">${logicText}</td><td class="center">${c.penalty}</td><td><button class="btn ghost editCi" data-id="${c.id}">تعديل</button> <button class="btn" data-id="${c.id}" data-act="delCi" style="background:var(--danger);color:#fff">حذف</button></td>`;
     tbody.appendChild(tr);
   });
   els('.editCi').forEach(b=> b.addEventListener('click', e=> startEditCi(e.currentTarget.dataset.id)));
-  els('[data-act="delCi"]').forEach(b=> b.addEventListener('click', async e=>{
-    const id = e.currentTarget.dataset.id; const ok = await confirmModal('حذف البند؟'); if(!ok) return;
-    const removedDedIds = state.deductions.filter(d=> d.criteriaId===id).map(d=> d.id);
-    state.criteria = state.criteria.filter(x=> x.id !== id);
-    state.deductions = state.deductions.filter(d=> d.criteriaId !== id);
-    state.evaluations = state.evaluations.map(sess=> ({...sess, deductionIds: sess.deductionIds ? sess.deductionIds.filter(i=> !removedDedIds.includes(i)) : []}))
-                                       .filter(s=> !s.deductionIds || s.deductionIds.length>0);
-    save(); renderCriteria(); renderAllTables(); toast('تم حذف البند والخصومات المتعلقة به');
-  }));
+  els('[data-act="delCi"]').forEach(b=> b.addEventListener('click', async e=>{ if(await confirmModal('حذف البند؟')) { const id = e.currentTarget.dataset.id; state.criteria = state.criteria.filter(x=> x.id !== id); state.deductions = state.deductions.filter(d=> d.criteriaId !== id); save(); renderCriteria(); renderAllTables(); toast('تم الحذف'); }}));
 }
 function addCriterion(){
-  const name = el('#ci_name').value.trim(); const kind = el('#ci_kind').value; let max = Number(el('#ci_max').value); let penalty = Number(el('#ci_penalty').value);
-  if(!name) return alert('اكتب اسم البند'); if(!max || max<=0) max = 10; if(isNaN(penalty) || penalty<0) penalty = 0;
-  const id = uid('ci');
-  state.criteria.push({id,name,kind,max,penalty}); save();
-  el('#ci_name').value=''; el('#ci_max').value=10; el('#ci_kind').value='daily'; el('#ci_penalty').value=1;
-  renderCriteria(); renderAllTables(); populateSelects();
-  toast('تم إضافة البند مع قيمة الخصم');
+  const name = el('#ci_name').value.trim(); const kind = el('#ci_kind').value; let max = Number(el('#ci_max').value)||10; let penalty = Number(el('#ci_penalty').value)||1; const logic = el('#ci_logic').value; if(!name) return;
+  state.criteria.push({id:uid('ci'),name,kind,max,penalty,logic}); save(); renderCriteria(); renderAllTables(); toast('تم الإضافة');
 }
 function startEditCi(id){
   const c = state.criteria.find(x=> x.id===id); if(!c) return;
-  el('#ci_name').value = c.name; el('#ci_max').value = c.max; el('#ci_kind').value = c.kind; el('#ci_penalty').value = c.penalty;
-  const btn = el('#addCi'); btn.textContent='حفظ التعديل'; btn.onclick = ()=> saveEditCi(id);
+  el('#ci_name').value = c.name; el('#ci_max').value = c.max; el('#ci_kind').value = c.kind; el('#ci_penalty').value = c.penalty; el('#ci_logic').value = c.logic || 'negative';
+  el('#addCi').textContent='حفظ التعديل'; el('#addCi').onclick = ()=> saveEditCi(id);
 }
 function saveEditCi(id){
   const c = state.criteria.find(x=> x.id===id); if(!c) return;
-  c.name = el('#ci_name').value.trim(); c.max = Number(el('#ci_max').value) || c.max; c.kind = el('#ci_kind').value; c.penalty = Number(el('#ci_penalty').value) || 0;
-  save(); el('#addCi').textContent='➕ إضافة بند جديد'; el('#ci_name').value=''; el('#ci_max').value=10; el('#ci_kind').value='daily'; el('#ci_penalty').value=1;
-  renderCriteria(); renderAllTables(); populateSelects(); toast('تم تعديل البند وقيمة الخصم');
+  c.name = el('#ci_name').value.trim(); c.max = Number(el('#ci_max').value)||10; c.kind = el('#ci_kind').value; c.penalty = Number(el('#ci_penalty').value)||0; c.logic = el('#ci_logic').value;
+  save(); el('#addCi').textContent='➕ إضافة بند جديد'; el('#addCi').onclick = addCriterion; el('#ci_name').value=''; renderCriteria(); renderAllTables(); toast('تم التعديل');
 }
-function restoreDefaults(){
-  const ok = confirm('سيتم استعادة البنود الافتراضية (لن يؤثر على المعلمين والبيانات). متابعة؟'); if(!ok) return;
-  state.criteria = DEFAULT_CRITERIA.slice(); save(); renderCriteria(); renderAllTables(); populateSelects(); toast('تم استعادة البنود الافتراضية');
-}
+function restoreDefaults(){ if(!confirm('هل أنت متأكد؟')) return; state.criteria = DEFAULT_CRITERIA.slice(); save(); renderCriteria(); renderAllTables(); toast('تمت الاستعادة'); }
 
-/* ---------- Populate selects ---------- */
-function populateSelects(){
-  ['attendance_teacher','absence_teacher'].forEach(id=>{
-    const sel = el('#'+id); if(!sel) return; const prev = sel.value; sel.innerHTML = '';
-    const ph = document.createElement('option'); ph.value=''; ph.textContent='-- اختر --'; sel.appendChild(ph);
-    state.teachers.forEach(t=> { const o = document.createElement('option'); o.value = t.id; o.textContent = t.name + (t.subject?(' — '+t.subject):''); sel.appendChild(o); });
-    sel.value = prev;
-  });
-}
-
-/* ---------- Build grid for kind ---------- */
+/* Grid Logic */
 function buildGridForKind(kind){
-  const wrap = el('#'+kind+'_table_wrap'); if(!wrap) return;
-  wrap.innerHTML = '';
+  const wrap = el('#'+kind+'_table_wrap'); if(!wrap) return; wrap.innerHTML = '';
   const crits = (state.criteria||[]).filter(c=> c.kind===kind);
   const teachers = state.teachers || [];
   if(crits.length===0){ wrap.innerHTML = '<div class="small">لا توجد بنود لهذا النوع</div>'; return; }
+  if(!uiState[kind] || !crits.find(c=> c.id === uiState[kind])) { uiState[kind] = crits[0].id; }
+  const activeCrit = crits.find(c => c.id === uiState[kind]);
+  const isPos = (activeCrit.logic === 'positive');
+  const selectContainer = document.createElement('div');
+  selectContainer.style.cssText = "margin-bottom:15px; padding:10px; background:#f1f6f1; border-radius:8px; border:1px solid #e0e0e0; display:flex; align-items:center; gap:10px; flex-wrap:wrap";
+  const label = document.createElement('label'); label.innerHTML = "<strong>اختر بند التقييم:</strong>";
+  const select = document.createElement('select'); select.style.cssText = "padding:8px; border-radius:6px; border:1px solid #ccc; flex:1; min-width:200px;";
+  crits.forEach(c => { const option = document.createElement('option'); option.value = c.id; const logicSign = c.logic==='positive' ? '✔' : '✖'; option.textContent = `${logicSign} ${c.name} (خصم: ${c.penalty})`; if(c.id === activeCrit.id) option.selected = true; select.appendChild(option); });
+  select.addEventListener('change', (e) => { uiState[kind] = e.target.value; buildGridForKind(kind); });
+  selectContainer.appendChild(label); selectContainer.appendChild(select); wrap.appendChild(selectContainer);
   const tbl = document.createElement('table'); tbl.className = 'table';
   const thead = document.createElement('thead'); const thr = document.createElement('tr');
-  thr.innerHTML = '<th>المعلم</th>';
-  crits.forEach(c=> thr.innerHTML += `<th>${escapeHtml(c.name)}<div class="small">(-${c.penalty})</div></th>`);
-  thr.innerHTML += '<th>مجموع الخصم</th>';
+  const actionText = isPos ? 'الحالة (حدد للحضور ✔)' : 'الحالة (حدد للمخالفة ✖)';
+  const color = isPos ? 'var(--emerald)' : 'var(--danger)';
+  thr.innerHTML = `<th style="width:40%">المعلم</th><th>${escapeHtml(activeCrit.name)} <span class="small" style="color:${color}">${actionText}</span></th><th style="width:15%">الخصم المتوقع</th>`;
   thead.appendChild(thr); tbl.appendChild(thead);
   const tbody = document.createElement('tbody');
   teachers.forEach(t=>{
-    const tr = document.createElement('tr');
-    let cells = `<td>${escapeHtml(t.name)}</td>`;
-    crits.forEach(c=>{
-      const chkId = `chk_${kind}_${c.id}_${t.id}`;
-      cells += `<td class="center"><input type="checkbox" id="${chkId}" data-kind="${kind}" data-criteria="${c.id}" data-teacher="${t.id}"></td>`;
-    });
-    cells += `<td class="center sum-cell" data-teacher="${t.id}">0</td>`;
-    tr.innerHTML = cells;
+    const tr = document.createElement('tr'); const chkId = `chk_${kind}_${activeCrit.id}_${t.id}`; const chkClass = isPos ? 'chk-positive' : ''; const chkLabel = isPos ? 'حاضر / ملتزم' : 'مخالف / مقصر';
+    tr.innerHTML = `<td><strong>${escapeHtml(t.name)}</strong></td><td class="center" style="background:#fff;"><label style="cursor:pointer; display:block; padding:5px;"><input type="checkbox" class="${chkClass}" id="${chkId}" data-kind="${kind}" data-criteria="${activeCrit.id}" data-teacher="${t.id}" data-logic="${activeCrit.logic||'negative'}" style="transform:scale(1.2);"><span style="margin-right:8px; font-size:0.9rem; color:#777">${chkLabel}</span></label></td><td class="center sum-cell" data-teacher="${t.id}" style="font-weight:bold; color:var(--danger)">0</td>`;
     tbody.appendChild(tr);
   });
-  tbl.appendChild(tbody);
-  wrap.appendChild(tbl);
-  tbody.querySelectorAll('input[type="checkbox"]').forEach(chk=>{
-    chk.addEventListener('change', ()=> updateGridSums(kind));
-  });
+  tbl.appendChild(tbody); wrap.appendChild(tbl);
+  tbody.querySelectorAll('input[type="checkbox"]').forEach(chk=>{ chk.addEventListener('change', ()=> updateGridSums(kind)); });
+  updateGridSums(kind);
 }
 function updateGridSums(kind){
-  const crits = (state.criteria||[]).filter(c=> c.kind===kind);
-  const tbody = el('#'+kind+'_table_wrap tbody'); if(!tbody) return;
-  const rows = Array.from(tbody.querySelectorAll('tr'));
-  rows.forEach(row=>{
-    const teacherId = row.querySelector('.sum-cell').dataset.teacher;
-    let total = 0;
-    crits.forEach(c=>{
-      const chk = row.querySelector(`input[data-criteria="${c.id}"][data-teacher="${teacherId}"]`);
-      if(chk && chk.checked) total += Number(c.penalty || 0);
-    });
-    row.querySelector('.sum-cell').textContent = total;
+  const currentCritId = uiState[kind]; if(!currentCritId) return;
+  const crits = (state.criteria||[]).filter(c=> c.id === currentCritId);
+  const activeCrit = crits[0]; const tbody = el('#'+kind+'_table_wrap tbody'); if(!tbody) return;
+  Array.from(tbody.querySelectorAll('tr')).forEach(row=>{
+    const teacherId = row.querySelector('.sum-cell').dataset.teacher; let total = 0; const chk = row.querySelector(`input[data-criteria="${activeCrit.id}"][data-teacher="${teacherId}"]`);
+    if(chk){ const isPos = (activeCrit.logic === 'positive'); if(isPos && !chk.checked) total = Number(activeCrit.penalty||0); if(!isPos && chk.checked) total = Number(activeCrit.penalty||0); }
+    const cell = row.querySelector('.sum-cell'); cell.textContent = total; cell.style.color = total>0 ? 'var(--danger)' : '#ccc';
   });
 }
-
-/* ---------- Save grid session ---------- */
 function saveGridSession(kind){
-  const dateInput = el('#'+kind+'_date'); const dateVal = dateInput ? dateInput.value : '';
-  if(!dateVal){ alert('اختر تاريخ الجلسة'); return; }
-  const crits = (state.criteria||[]).filter(c=> c.kind===kind);
+  const dateInput = el('#'+kind+'_date'); const dateVal = dateInput ? dateInput.value : ''; if(!dateVal){ alert('اختر تاريخ الجلسة'); return; }
+  const currentCritId = uiState[kind]; if(!currentCritId) return;
+  const crits = (state.criteria||[]).filter(c=> c.id === currentCritId); const activeCrit = crits[0];
   const tbody = el('#'+kind+'_table_wrap tbody'); if(!tbody) return;
-  const rows = Array.from(tbody.querySelectorAll('tr'));
-  const createdDedIds = [];
+  const rows = Array.from(tbody.querySelectorAll('tr')); const createdDedIds = [];
   rows.forEach(row=>{
-    const teacherId = row.querySelector('.sum-cell').dataset.teacher;
-    crits.forEach(c=>{
-      const chk = row.querySelector(`input[data-criteria="${c.id}"][data-teacher="${teacherId}"]`);
-      if(chk && chk.checked){
-        const ded = { id: uid('ded'), teacherId, criteriaId: c.id, kind, date: new Date(dateVal).toISOString(), deduction: Number(c.penalty || 0), note: '' };
-        state.deductions.push(ded);
-        createdDedIds.push(ded.id);
-      }
-    });
+    const teacherId = row.querySelector('.sum-cell').dataset.teacher; const chk = row.querySelector(`input[data-criteria="${activeCrit.id}"][data-teacher="${teacherId}"]`);
+    if(chk){ const isPos = (activeCrit.logic === 'positive'); let deductAmount = 0; if(isPos && !chk.checked) deductAmount = Number(activeCrit.penalty||0); if(!isPos && chk.checked) deductAmount = Number(activeCrit.penalty||0); if(deductAmount > 0){ const ded = { id: uid('ded'), teacherId, criteriaId: activeCrit.id, kind, date: new Date(dateVal).toISOString(), deduction: deductAmount, note: '' }; state.deductions.push(ded); createdDedIds.push(ded.id); } }
   });
-  if(createdDedIds.length===0){ alert('لم تحدد أي مقصرين (مربعات الاختيار فارغة)'); return; }
-  const sess = { id: uid('sess'), kind, date: new Date(dateVal).toISOString(), deductionIds: createdDedIds };
-  state.evaluations.push(sess);
-  save();
-  renderSessions(kind);
-  rows.forEach(r=> r.querySelectorAll('input[type="checkbox"]').forEach(c=> c.checked = false));
-  updateGridSums(kind);
-  toast(`تم تسجيل الجلسة وتطبيق ${createdDedIds.length} خصمًا`);
+  state.evaluations.push({ id: uid('sess'), kind, date: new Date(dateVal).toISOString(), deductionIds: createdDedIds });
+  save(); renderSessions(kind); rows.forEach(r=> r.querySelectorAll('input[type="checkbox"]').forEach(c=> c.checked = false)); updateGridSums(kind); toast(createdDedIds.length > 0 ? `تم الحفظ: ${createdDedIds.length} خصومات` : 'تم حفظ الجلسة');
 }
-
-/* ---------- Render sessions (مصحح: لا أخطاء نحوية هنا) ---------- */
 function renderSessions(kind){
-  const headEl = el('#'+kind+'_head'); const bodyEl = el('#'+kind+'_body');
-  if(!headEl || !bodyEl) return;
-  headEl.innerHTML = ''; bodyEl.innerHTML = '';
-  const crits = state.criteria.filter(c=> c.kind===kind);
-  // header
-  let trh = document.createElement('tr');
-  trh.innerHTML = '<th>المعلم</th><th>التاريخ</th>';
-  crits.forEach(c=> trh.innerHTML += `<th>${escapeHtml(c.name)}</th>`);
-  trh.innerHTML += '<th>المجموع</th><th>حذف</th>';
-  headEl.appendChild(trh);
-  // sessions
-  const rows = state.evaluations.filter(s=> s.kind===kind);
+  const headEl = el('#'+kind+'_head'); const bodyEl = el('#'+kind+'_body'); if(!headEl || !bodyEl) return;
+  headEl.innerHTML = '<tr><th>المعلم</th><th>التاريخ</th><th>البند</th><th>خصم</th><th>حذف</th></tr>'; bodyEl.innerHTML = '';
+  const rows = state.evaluations.filter(s=> s.kind===kind).sort((a,b)=> new Date(b.date) - new Date(a.date));
   rows.forEach(sess=>{
-    const tIds = Array.from(new Set((sess.deductionIds||[]).map(id=>{
-      const d = state.deductions.find(x=> x.id===id); return d? d.teacherId : null;
-    }).filter(Boolean)));
+    if((sess.deductionIds||[]).length === 0) return;
+    const tIds = [...new Set((sess.deductionIds||[]).map(id=> { const d=state.deductions.find(x=>x.id===id); return d?d.teacherId:null; }).filter(Boolean))];
     tIds.forEach(tid=>{
-      const t = state.teachers.find(x=> x.id===tid) || {name:'غير معروف'};
-      const tr = document.createElement('tr');
-      let inner = `<td>${escapeHtml(t.name)}</td><td>${new Date(sess.date).toLocaleString()}</td>`;
-      let total = 0;
-      crits.forEach(c=>{
-        const totalDedForThis = state.deductions.filter(d=> d.teacherId===tid && d.criteriaId===c.id && d.kind===kind && (sess.deductionIds||[]).includes(d.id)).reduce((s,i)=> s + Number(i.deduction || 0),0);
-        const final = Math.max(0, c.max - totalDedForThis);
-        inner += `<td class="center">${final}<div class="small">(-${totalDedForThis})</div></td>`;
-        total += final;
-      });
-      inner += `<td class="center">${total}</td><td class="center"><button class="btn" data-id="${sess.id}" data-kind="${kind}" style="background:var(--danger);color:#fff">حذف</button></td>`;
-      tr.innerHTML = inner;
-      bodyEl.appendChild(tr);
+      const t = state.teachers.find(x=> x.id===tid) || {name:'?'};
+      const deds = state.deductions.filter(d=> d.teacherId===tid && (sess.deductionIds||[]).includes(d.id));
+      const critNames = deds.map(d=> { const c=state.criteria.find(cc=>cc.id===d.criteriaId); return c?c.name:'?'; }).join(', ');
+      const total = deds.reduce((s,d)=> s + (d.deduction||0), 0);
+      const tr = document.createElement('tr'); tr.innerHTML = `<td>${escapeHtml(t.name)}</td><td>${new Date(sess.date).toLocaleDateString('ar-EG')}</td><td>${critNames}</td><td class="center" style="color:var(--danger)">${total}</td><td class="center"><button class="btn" data-id="${sess.id}" style="background:var(--danger);color:#fff">حذف</button></td>`; bodyEl.appendChild(tr);
     });
   });
-  // bind delete session buttons
-  bodyEl.querySelectorAll('button[data-id]').forEach(b=> b.addEventListener('click', async e=>{
-    const id = e.currentTarget.dataset.id; const ok = await confirmModal('حذف الجلسة؟'); if(!ok) return;
-    const sess = state.evaluations.find(s=> s.id===id);
-    if(sess && sess.deductionIds && Array.isArray(sess.deductionIds)){
-      state.deductions = state.deductions.filter(d=> !sess.deductionIds.includes(d.id));
-    }
-    state.evaluations = state.evaluations.filter(s=> s.id !== id);
-    save(); renderSessions(e.currentTarget.dataset.kind); toast('تم الحذف');
-  }));
+  bodyEl.querySelectorAll('button[data-id]').forEach(b=> b.addEventListener('click', async e=>{ if(!await confirmModal('حذف؟')) return; const id = e.currentTarget.dataset.id; const sess = state.evaluations.find(s=> s.id===id); if(sess) state.deductions = state.deductions.filter(d=> !sess.deductionIds.includes(d.id)); state.evaluations = state.evaluations.filter(s=> s.id !== id); save(); renderSessions(kind); toast('تم الحذف'); }));
 }
 
-/* ---------- Helper to render grid + sessions for a kind ---------- */
-function renderGridAndSessions(kind){
-  buildGridForKind(kind);
-  renderSessions(kind);
-  updateGridSums(kind);
-}
-
-/* ---------- Render all ---------- */
-function renderAllTables(){
-  renderGridAndSessions('daily');
-  renderGridAndSessions('weekly');
-  renderGridAndSessions('monthly');
-  renderAttendanceTable(); renderAbsences(); renderFullReport(); renderSummaryReport();
-}
-
-/* ---------- Attendance & Absences ---------- */
+/* Attendance & Absence */
 function saveAttendance(){
-  const sel = el('#attendance_teacher'); if(!sel || !sel.value) return alert('اختر معلماً');
+  const sel = el('#attendance_teacher'); if(!sel.value) return alert('اختر معلماً');
   const date = el('#att_date').value; if(!date) return alert('اختر التاريخ');
   const arrival = el('#att_arrival').value; const leave = el('#att_leave').value;
-  const officialStart = el('#official_start').value || state.official.start; const officialEnd = el('#official_end').value || state.official.end;
-  const late = Math.max(0, minutesBetween(officialStart, arrival));
-  const early = Math.max(0, minutesBetween(leave, officialEnd));
-  const total = late + early; const steps = Math.floor(total/30); let ded = steps * 0.5; const cap = Number(el('#max_att').value) || state.official.maxAttendancePenalty || 2; if(ded>cap) ded = cap;
+  const late = Math.max(0, minutesBetween(el('#official_start').value, arrival));
+  const early = Math.max(0, minutesBetween(leave, el('#official_end').value));
+  const total = late + early; let ded = Math.floor(total/30) * 0.5; const cap = Number(el('#max_att').value); if(ded>cap) ded=cap;
   const rec = {id: uid('att'), teacherId: sel.value, date, arrival, leave, late, early, deduction: ded};
-  state.attendance.push(rec);
-  if(ded>0) state.deductions.push({ id: uid('ded'), teacherId: sel.value, criteriaId: 'attendance_auto', kind: 'attendance', date: (new Date()).toISOString(), deduction: ded, note:`تأخر ${late}د انصراف ${early}د`, sessionId: null });
-  save(); renderAttendanceTable(); toast('تم حفظ الحضور والخصم');
+  state.attendance.push(rec); if(ded>0) state.deductions.push({ id: uid('ded'), teacherId: sel.value, criteriaId: 'att_auto', kind: 'attendance', date: new Date().toISOString(), deduction: ded });
+  save(); renderAttendanceTable(); toast('تم الحفظ');
 }
 function renderAttendanceTable(){
   const tbody = el('#attendance_table tbody'); if(!tbody) return; tbody.innerHTML='';
   state.attendance.forEach(a=>{
-    const t = state.teachers.find(tt=> tt.id===a.teacherId) || {name:'غير معروف'};
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${escapeHtml(t.name)}</td><td>${a.date}</td><td class="center">${a.arrival}</td><td class="center">${a.leave}</td><td class="center">${a.late}</td><td class="center">${a.early}</td><td class="center">${a.deduction||0}</td><td class="center"><button class="btn ghost delAtt" data-id="${a.id}">حذف</button></td>`;
-    tbody.appendChild(tr);
+    const t = state.teachers.find(tt=> tt.id===a.teacherId) || {name:'?'};
+    const tr = document.createElement('tr'); tr.innerHTML = `<td>${escapeHtml(t.name)}</td><td>${a.date}</td><td class="center">${a.arrival}</td><td class="center">${a.leave}</td><td class="center">${a.late}</td><td class="center">${a.early}</td><td class="center">${a.deduction}</td><td class="center"><button class="btn ghost delAtt" data-id="${a.id}">حذف</button></td>`; tbody.appendChild(tr);
   });
-  els('.delAtt').forEach(b=> b.addEventListener('click', async e=>{
-    const id = e.currentTarget.dataset.id; const ok = await confirmModal('حذف سجل الحضور؟'); if(!ok) return;
-    const rec = state.attendance.find(x=> x.id===id);
-    if(rec){
-      state.deductions = state.deductions.filter(d=> !(d.teacherId===rec.teacherId && d.kind==='attendance' && d.date.slice(0,10) === new Date(rec.date).toISOString().slice(0,10)));
-    }
-    state.attendance = state.attendance.filter(x=> x.id !== id);
-    save(); renderAttendanceTable(); toast('تم الحذف');
-  }));
+  els('.delAtt').forEach(b=> b.addEventListener('click', async e=>{ if(await confirmModal('حذف؟')) { const id = e.currentTarget.dataset.id; state.attendance = state.attendance.filter(x=>x.id!==id); save(); renderAttendanceTable(); toast('تم الحذف'); }}));
 }
-
-function bindAbsTypeChange(){ const absType = el('#abs_type'); if(!absType) return; absType.addEventListener('change', e=>{ el('#abs_penalty_wrap').style.display = e.target.value==='unexcused' ? 'block' : 'none'; }); }
 function saveAbsence(){
-  const sel = el('#absence_teacher'); if(!sel || !sel.value) return alert('اختر معلماً');
+  const sel = el('#absence_teacher'); if(!sel.value) return alert('اختر معلماً');
   const date = el('#abs_date').value; if(!date) return alert('اختر التاريخ');
-  const type = el('#abs_type').value; let penalty = 0; if(type==='unexcused') penalty = Number(el('#abs_penalty').value) || 0;
-  const rec = { id: uid('abs'), teacherId: sel.value, date, type, penalty };
-  state.absences.push(rec);
-  if(type==='unexcused' && penalty>0) state.deductions.push({ id: uid('ded'), teacherId: sel.value, criteriaId: 'absence_auto', kind: 'absence', date: (new Date()).toISOString(), deduction: penalty, note:'غياب بدون عذر', sessionId: null });
-  save(); renderAbsences(); toast('تم حفظ الغياب');
+  const type = el('#abs_type').value; let penalty = Number(el('#abs_penalty').value) || 0;
+  state.absences.push({ id: uid('abs'), teacherId: sel.value, date, type, penalty });
+  if(penalty>0) state.deductions.push({ id: uid('ded'), teacherId: sel.value, criteriaId: 'abs_auto', kind: 'absence', date: new Date().toISOString(), deduction: penalty });
+  save(); renderAbsences(); toast('تم الحفظ');
 }
 function renderAbsences(){
   const tbody = el('#absence_table tbody'); if(!tbody) return; tbody.innerHTML='';
   state.absences.forEach(a=>{
-    const t = state.teachers.find(tt=> tt.id===a.teacherId) || {name:'غير معروف'};
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${escapeHtml(t.name)}</td><td>${a.date}</td><td>${a.type}</td><td class="center">${a.penalty||0}</td><td class="center"><button class="btn ghost delAbs" data-id="${a.id}">حذف</button></td>`;
-    tbody.appendChild(tr);
+    const t = state.teachers.find(tt=> tt.id===a.teacherId) || {name:'?'};
+    const tr = document.createElement('tr'); tr.innerHTML = `<td>${escapeHtml(t.name)}</td><td>${a.date}</td><td>${a.type==='excused'?'بعذر':'بدون عذر'}</td><td class="center">${a.penalty}</td><td class="center"><button class="btn ghost delAbs" data-id="${a.id}">حذف</button></td>`; tbody.appendChild(tr);
   });
-  els('.delAbs').forEach(b=> b.addEventListener('click', async e=>{
-    const id = e.currentTarget.dataset.id; const ok = await confirmModal('حذف سجل الغياب؟'); if(!ok) return;
-    const rec = state.absences.find(x=> x.id===id);
-    if(rec && rec.penalty>0){
-      state.deductions = state.deductions.filter(d=> !(d.teacherId===rec.teacherId && d.kind==='absence' && d.date.slice(0,10) === new Date(rec.date).toISOString().slice(0,10)));
-    }
-    state.absences = state.absences.filter(x=> x.id !== id);
-    save(); renderAbsences(); toast('تم الحذف');
-  }));
+  els('.delAbs').forEach(b=> b.addEventListener('click', async e=>{ if(await confirmModal('حذف؟')){ state.absences = state.absences.filter(x=>x.id!==e.currentTarget.dataset.id); save(); renderAbsences(); toast('تم الحذف'); }}));
 }
 
-/* ---------- Summary & Reports ---------- */
-function computeTeacherSummary(){
-  const crits = state.criteria || [];
-  const totalPossible = crits.reduce((s,c)=> s + Number(c.max||0),0);
-  const rows = state.teachers.map(t=>{
-    const perCriterion = crits.map(c=>{
-      const items = state.deductions.filter(d=> d.teacherId===t.id && d.criteriaId===c.id && d.kind===c.kind);
-      const totalDed = items.reduce((s,i)=> s + Number(i.deduction||0),0);
-      const final = Math.max(0, c.max - totalDed);
-      return {id:c.id, name:c.name, max:c.max, totalDed, final, kind:c.kind};
-    });
-    const sumCriteriaFinals = perCriterion.reduce((s,it)=> s + it.final, 0);
-    const absenceSum = state.deductions.filter(d=> d.teacherId===t.id && d.kind==='absence').reduce((s,i)=> s + Number(i.deduction||0),0);
-    const attendanceSum = state.deductions.filter(d=> d.teacherId===t.id && d.kind==='attendance').reduce((s,i)=> s + Number(i.deduction||0),0);
-    const totalAfterPenalties = Math.max(0, sumCriteriaFinals - (absenceSum + attendanceSum));
-    const percent = totalPossible ? ( (totalAfterPenalties / totalPossible) * 100 ) : 0;
-    return {teacher: t, perCriterion, absenceSum, attendanceSum, sumCriteriaFinals, totalAfterPenalties, percent, totalPossible};
-  });
-  return {crits, rows, totalPossible};
-}
-
+/* REPORTS with DATE FILTER */
 function renderSummaryReport(){
   const head = el('#summary_head'); const body = el('#summary_body'); if(!head) return;
-  el('#reportDate').textContent = 'تاريخ التقرير: ' + (new Date()).toLocaleDateString();
+  const startVal = el('#summary_start').value;
+  const endVal = el('#summary_end').value;
+
+  el('#reportDate').textContent = 'تاريخ التقرير: ' + new Date().toLocaleDateString();
   head.innerHTML = ''; body.innerHTML = '';
-  const {crits, rows, totalPossible} = computeTeacherSummary();
+  const crits = state.criteria;
   let h = '<tr><th>المعلم</th><th>التخصص</th>';
   crits.forEach(c=> h += `<th>${escapeHtml(c.name)}</th>`);
-  h += `<th>الحضور والانصراف</th><th>الغياب</th><th>الإجمالي بعد الخصم</th><th>النسبة المئوية</th></tr>`;
+  h += `<th>الحضور</th><th>الغياب</th><th>الناتج النهائي</th><th>%</th></tr>`;
   head.innerHTML = h;
-  const sorted = rows.slice().sort((a,b)=> b.totalAfterPenalties - a.totalAfterPenalties);
-  sorted.forEach((r,index)=>{
-    let bg = '';
-    if(index===0) bg = 'style="background:#fff6cc"';
-    else if(index===1) bg = 'style="background:#f0f0f0"';
-    else if(index===2) bg = 'style="background:#ffe0b3"';
-    let row = `<tr ${bg}><td>${escapeHtml(r.teacher.name)}</td><td>${escapeHtml(r.teacher.subject||'-')}</td>`;
-    r.perCriterion.forEach(p=> row += `<td class="center">${p.final}<div class="small">(-${p.totalDed})</div></td>`);
-    row += `<td class="center">${r.attendanceSum}</td><td class="center">${r.absenceSum}</td>`;
-    row += `<td class="center">${r.totalAfterPenalties}</td><td class="center">${r.percent.toFixed(1)}%</td></tr>`;
-    body.innerHTML += row;
-  });
-  const bestEl = el('#bestTeacher');
-  if(bestEl){
-    if(sorted.length===0) bestEl.style.display='none';
-    else { const best = sorted[0]; bestEl.style.display='block'; bestEl.innerHTML = `🏅 أفضل معلم: <strong>${escapeHtml(best.teacher.name)}</strong> — نتيجة نهائية: <strong>${best.totalAfterPenalties}</strong> — (${best.percent.toFixed(1)}%)`; }
-  }
-}
 
-/* ---------- Full report ---------- */
-function renderFullReport(){
-  const head = el('#full_head'); const body = el('#full_body'); const foot = el('#full_foot'); if(!head) return;
-  head.innerHTML=''; body.innerHTML=''; foot.innerHTML='';
-  const crits = state.criteria || [];
-  let h = '<tr><th>المعلم</th><th>الرقم</th>';
-  crits.forEach(c=> h += `<th>${escapeHtml(c.name)}</th><th>مجموع خصم</th><th>ناتج</th><th>ملاحظة</th>`);
-  h += '<th>خصم الغياب</th><th>خصم الحضور</th><th>الأداء النهائي</th></tr>';
-  head.innerHTML = h;
-  state.teachers.forEach(t=>{
-    let row = `<tr><td>${escapeHtml(t.name)}</td><td>${escapeHtml(t.id)}</td>`;
-    let sumBonds = 0;
-    crits.forEach(c=>{
-      const items = state.deductions.filter(d=> d.teacherId===t.id && d.criteriaId===c.id && d.kind===c.kind);
-      const totalDed = items.reduce((s,i)=> s + Number(i.deduction||0),0);
-      const final = Math.max(0, c.max - totalDed);
-      const note = items.length ? items[items.length-1].note || '-' : '-';
-      row += `<td class="center">${c.max}</td><td class="center">${totalDed}</td><td class="center">${final}</td><td>${escapeHtml(note)}</td>`;
-      sumBonds += final;
+  const rowsData = state.teachers.map(t=>{
+    let totalPossible = 0, currentScore = 0;
+    const cells = crits.map(c=>{
+      totalPossible += c.max;
+      // FILTER LOGIC
+      const deds = state.deductions.filter(d=> d.teacherId===t.id && d.criteriaId===c.id && isDateInRange(d.date, startVal, endVal));
+      const sumDed = deds.reduce((s,x)=> s + x.deduction, 0);
+      const final = Math.max(0, c.max - sumDed);
+      currentScore += final;
+      return `<td class="center">${final} <span class="small">(-${sumDed})</span></td>`;
     });
-    const absenceSum = state.deductions.filter(d=> d.teacherId===t.id && d.kind==='absence').reduce((s,i)=> s + Number(i.deduction||0),0);
-    const attendanceSum = state.deductions.filter(d=> d.teacherId===t.id && d.kind==='attendance').reduce((s,i)=> s + Number(i.deduction||0),0);
-    const finalScore = Math.max(0, sumBonds - (absenceSum + attendanceSum));
-    row += `<td class="center">${absenceSum}</td><td class="center">${attendanceSum}</td><td class="center">${finalScore}</td></tr>`;
-    body.innerHTML += row;
+    // FILTER LOGIC for Attendance/Absence
+    const attDed = state.deductions.filter(d=> d.teacherId===t.id && d.kind==='attendance' && isDateInRange(d.date, startVal, endVal)).reduce((s,x)=>s+x.deduction,0);
+    const absDed = state.deductions.filter(d=> d.teacherId===t.id && d.kind==='absence' && isDateInRange(d.date, startVal, endVal)).reduce((s,x)=>s+x.deduction,0);
+    
+    let final = Math.max(0, currentScore - (attDed + absDed));
+    let percent = totalPossible ? ((final/totalPossible)*100).toFixed(1) : 0;
+    return { t, html: cells.join(''), attDed, absDed, final, percent };
   });
-  const allMax = state.criteria.reduce((s,c)=> s + Number(c.max||0),0);
-  const totalDeductions = state.deductions.reduce((s,d)=> s + Number(d.deduction||0),0);
-  const allFinals = state.teachers.reduce((s,t)=> {
-    const sumBonds = state.criteria.reduce((a,c)=> a + Math.max(0, c.max - state.deductions.filter(d=> d.teacherId===t.id && d.criteriaId===c.id && d.kind===c.kind).reduce((x,y)=> x + Number(y.deduction||0),0)),0);
-    const absenceSum = state.deductions.filter(d=> d.teacherId===t.id && d.kind==='absence').reduce((x,y)=> x + Number(y.deduction||0),0);
-    const attendanceSum = state.deductions.filter(d=> d.teacherId===t.id && d.kind==='attendance').reduce((x,y)=> x + Number(y.deduction||0),0);
-    return s + Math.max(0, sumBonds - (absenceSum + attendanceSum));
-  },0);
-  const tr = document.createElement('tr'); tr.className='full-gold';
-  tr.innerHTML = `<td colspan="${2 + (state.criteria.length*4) + 3}" style="text-align:left;padding:12px"><strong>ملخص:</strong> عدد البنود: <strong>${state.criteria.length}</strong> | مجموع القيم القصوى: <strong>${allMax}</strong> | مجموع الخصومات الكلية: <strong>${totalDeductions}</strong> | المجموع النهائي: <strong>${allFinals}</strong></td>`;
-  foot.appendChild(tr);
+
+  rowsData.sort((a,b)=> b.final - a.final).forEach((r,i)=>{
+    let bg = i===0 ? '#fff6cc' : (i===1 ? '#f0f0f0' : (i===2 ? '#ffe0b3' : ''));
+    let tr = `<tr style="background:${bg}"><td>${escapeHtml(r.t.name)}</td><td>${escapeHtml(r.t.subject||'-')}</td>${r.html}<td class="center">${r.attDed}</td><td class="center">${r.absDed}</td><td class="center" style="font-weight:bold">${r.final}</td><td class="center">${r.percent}%</td></tr>`;
+    body.innerHTML += tr;
+  });
+  if(rowsData.length) el('#bestTeacher').innerHTML = `🏅 الأفضل: ${escapeHtml(rowsData[0].t.name)} (${rowsData[0].percent}%)`;
 }
 
-/* ---------- Export / Import / Backup / Reset ---------- */
-function doBackup(){ const blob = new Blob([JSON.stringify(state,null,2)],{type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'index27_backup_v3.json'; a.click(); URL.revokeObjectURL(url); toast('تم تنزيل النسخة الاحتياطية'); }
-function doRestore(){ const inp = document.createElement('input'); inp.type='file'; inp.accept='application/json'; inp.onchange = e=>{ const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = ev=>{ try{ const obj = JSON.parse(ev.target.result); if(obj && Array.isArray(obj.teachers)){ state = obj; save(); location.reload(); } else alert('ملف غير صالح'); }catch(err){ alert('خطأ في الملف'); } }; r.readAsText(f); }; inp.click(); }
-async function doReset(){ const ok = await confirmModal('سيتم مسح كل البيانات. موافق؟'); if(!ok) return; state = {teachers:[], criteria: DEFAULT_CRITERIA.slice(), evaluations:[], deductions:[], attendance:[], absences:[], official:{start:'07:00', end:'13:25', maxAttendancePenalty:2}}; save(); location.reload(); }
+function renderFullReport(){
+  const head = el('#full_head'); const body = el('#full_body');
+  const startVal = el('#full_start').value;
+  const endVal = el('#full_end').value;
 
-/* Import teachers (Excel/CSV) */
+  let h = '<tr><th>المعلم</th>';
+  state.criteria.forEach(c=> h+=`<th>${c.name}</th>`);
+  h += '<th>الناتج</th></tr>';
+  head.innerHTML=h; body.innerHTML='';
+  
+  state.teachers.forEach(t=>{
+     let row = `<tr><td>${escapeHtml(t.name)}</td>`;
+     let total = 0;
+     state.criteria.forEach(c=>{
+        // FILTER LOGIC
+        const deds = state.deductions.filter(d=> d.teacherId===t.id && d.criteriaId===c.id && isDateInRange(d.date, startVal, endVal)).reduce((s,x)=>s+x.deduction,0);
+        const val = Math.max(0, c.max - deds);
+        total += val;
+        row += `<td class="center">${val}</td>`;
+     });
+     // FILTER LOGIC
+     const otherDed = state.deductions.filter(d=> d.teacherId===t.id && (d.kind==='attendance'||d.kind==='absence') && isDateInRange(d.date, startVal, endVal)).reduce((s,x)=>s+x.deduction,0);
+     total = Math.max(0, total - otherDed);
+     row += `<td class="center"><strong>${total}</strong></td></tr>`;
+     body.innerHTML += row;
+  });
+}
+
+function renderTeacherReport(tid){
+  const t = state.teachers.find(x=>x.id===tid); if(!t) return;
+  const startVal = el('#report_start').value;
+  const endVal = el('#report_end').value;
+
+  el('#r_teacher_name').textContent = t.name;
+  el('#r_teacher_meta').textContent = t.subject;
+  el('#r_period_info').textContent = (startVal || endVal) ? `عن الفترة من ${startVal||'...'} إلى ${endVal||'...'}` : 'عن كل الفترات';
+  el('#reportContainer').style.display='block';
+
+  let totalMax=0, totalDed=0;
+  let details = '';
+  state.criteria.forEach(c=>{
+    totalMax += c.max;
+    // FILTER LOGIC
+    const d = state.deductions.filter(x=>x.teacherId===tid && x.criteriaId===c.id && isDateInRange(x.date, startVal, endVal)).reduce((s,v)=>s+v.deduction,0);
+    totalDed += d;
+    details += `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:5px;"><span>${c.name}</span><span>${Math.max(0, c.max-d)} / ${c.max}</span></div>`;
+  });
+  // FILTER LOGIC
+  const attAbs = state.deductions.filter(x=>x.teacherId===tid && (x.kind==='attendance'||x.kind==='absence') && isDateInRange(x.date, startVal, endVal)).reduce((s,v)=>s+v.deduction,0);
+  const final = Math.max(0, totalMax - totalDed - attAbs);
+  const percent = totalMax ? ((final/totalMax)*100).toFixed(1) : 0;
+  
+  el('#r_kpis').innerHTML = `
+    <div class="card-kpi"><div>${final}</div><small>الدرجة</small></div>
+    <div class="card-kpi"><div>${percent}%</div><small>النسبة</small></div>
+    <div class="card-kpi"><div>${attAbs}</div><small>خصم غياب/تأخر</small></div>`;
+  el('#r_summary_text').textContent = `حصل المعلم على ${final} من ${totalMax}.`;
+  el('#r_details_tables').innerHTML = details;
+  
+  // FILTER LOGIC for lists
+  const atts = state.attendance.filter(a=>a.teacherId===tid && isDateInRange(a.date, startVal, endVal)).map(a=>`<div>${a.date}: حضور ${a.arrival} - انصراف ${a.leave} (خصم ${a.deduction})</div>`).join('');
+  el('#r_attendance_table').innerHTML = atts || 'لا يوجد';
+  const abss = state.absences.filter(a=>a.teacherId===tid && isDateInRange(a.date, startVal, endVal)).map(a=>`<div>${a.date}: ${a.type} (خصم ${a.penalty})</div>`).join('');
+  el('#r_absence_table').innerHTML = abss || 'لا يوجد';
+}
+
+function populateSelects(){
+  ['attendance_teacher','absence_teacher','report_teacher_select'].forEach(id=>{
+    const sel=el('#'+id); if(!sel) return; sel.innerHTML='<option value="">-- اختر --</option>';
+    state.teachers.forEach(t=> { const o=document.createElement('option'); o.value=t.id; o.textContent=t.name; sel.appendChild(o); });
+  });
+}
 function importTeachersFile(file){
-  const name = (file.name || '').toLowerCase();
-  if(name.endsWith('.csv')){
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const workbook = XLSX.read(e.target.result, {type:'string', raw:true});
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      processSheetRows(sheet);
-    };
-    reader.readAsText(file, 'utf-8');
-  } else {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const data = new Uint8Array(e.target.result);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      processSheetRows(sheet);
-    };
-    reader.readAsArrayBuffer(file);
-  }
-}
-function processSheetRows(sheet){
-  if(!sheet){ alert('الملف فارغ أو غير صالح'); return; }
-  const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-  if(!rows || rows.length===0){ alert('الملف لا يحتوي على بيانات'); return; }
-  const headers = rows[0].map(h => String(h||'').trim());
-  const nameIdx = headers.findIndex(h => ['الاسم','name'].includes(h.toLowerCase()));
-  const idIdx = headers.findIndex(h => ['الرقم','id','رقم'].includes(h.toLowerCase()));
-  const subjIdx = headers.findIndex(h => ['المادة','subject','المواد'].includes(h.toLowerCase()));
-  if(nameIdx===-1 || idIdx===-1){ alert('يجب أن يحتوي الملف على عمودين على الأقل: الاسم والالرقم'); return; }
-  let added = 0, skipped = 0;
-  for(let i=1;i<rows.length;i++){
-    const r = rows[i]; if(!r) continue;
-    const name = (r[nameIdx] || '').toString().trim();
-    const id = (r[idIdx] || '').toString().trim();
-    const subj = subjIdx!==-1 ? (r[subjIdx] || '').toString().trim() : '';
-    if(!name || !id){ skipped++; continue; }
-    if(state.teachers.some(t=> String(t.id).trim() === String(id).trim())){ skipped++; continue; }
-    state.teachers.push({id:String(id), name, subject: subj}); added++;
-  }
-  save(); renderTeachers(); populateSelects(); renderAllTables(); toast(`تم استيراد ${added} معلم — تم تخطي ${skipped} سجلاً`);
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, {type:'array'});
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet, {header:1});
+    let added=0;
+    rows.slice(1).forEach(r=>{
+       const name=r[0], id=r[1], sub=r[2];
+       if(name && id && !state.teachers.some(t=>t.id==id)){ state.teachers.push({id:String(id), name, subject:sub}); added++; }
+    });
+    save(); renderTeachers(); populateSelects(); toast(`تم استيراد ${added} معلم`);
+  };
+  reader.readAsArrayBuffer(file);
 }
 
-/* ---------- Init & bindings ---------- */
+/* AUTH & INIT */
 function init(){
-  load();
-  el('#addTeacher') && el('#addTeacher').addEventListener('click', addTeacher);
-  el('#addCi') && el('#addCi').addEventListener('click', addCriterion);
-  el('#restoreDefaults') && el('#restoreDefaults').addEventListener('click', restoreDefaults);
-  el('#saveDaily') && el('#saveDaily').addEventListener('click', ()=> saveGridSession('daily'));
-  el('#saveWeekly') && el('#saveWeekly').addEventListener('click', ()=> saveGridSession('weekly'));
-  el('#saveMonthly') && el('#saveMonthly').addEventListener('click', ()=> saveGridSession('monthly'));
-  el('#clearDaily') && el('#clearDaily').addEventListener('click', ()=> { buildGridForKind('daily'); toast('تم مسح العروض'); });
-  el('#clearWeekly') && el('#clearWeekly').addEventListener('click', ()=> { buildGridForKind('weekly'); toast('تم مسح العروض'); });
-  el('#clearMonthly') && el('#clearMonthly').addEventListener('click', ()=> { buildGridForKind('monthly'); toast('تم مسح العروض'); });
-  el('#saveAttendance') && el('#saveAttendance').addEventListener('click', saveAttendance);
-  el('#clearAttendance') && el('#clearAttendance').addEventListener('click', async ()=>{ const ok=await confirmModal('مسح سجلات الحضور؟'); if(!ok) return; state.attendance=[]; state.deductions = state.deductions.filter(d=> d.kind!=='attendance'); save(); renderAttendanceTable(); });
-  el('#saveAbsence') && el('#saveAbsence').addEventListener('click', saveAbsence);
-  el('#clearAbsence') && el('#clearAbsence').addEventListener('click', async ()=>{ const ok=await confirmModal('مسح سجلات الغياب؟'); if(!ok) return; state.absences=[]; state.deductions = state.deductions.filter(d=> d.kind!=='absence'); save(); renderAbsences(); });
-  el('#backup') && el('#backup').addEventListener('click', doBackup);
-  el('#backupTop') && el('#backupTop').addEventListener('click', doBackup);
-  el('#restore') && el('#restore').addEventListener('click', doRestore);
-  el('#printFull') && el('#printFull').addEventListener('click', ()=> window.print());
-  el('#resetAll') && el('#resetAll').addEventListener('click', doReset);
-  el('#official_start') && el('#official_start').addEventListener('change', e=>{ state.official.start = e.target.value; save(); });
-  el('#official_end') && el('#official_end').addEventListener('change', e=>{ state.official.end = e.target.value; save(); });
-  el('#max_att') && el('#max_att').addEventListener('change', e=>{ state.official.maxAttendancePenalty = Number(e.target.value)||2; save(); toast('تم حفظ الإعداد'); });
+  el('#doLogin').onclick = attemptLogin;
+  el('#logoutBtn').onclick = doLogout;
+  el('#login_pass').addEventListener("keypress", function(event) { if (event.key === "Enter") { event.preventDefault(); el("#doLogin").click(); } });
 
-  el('#btnImportFile') && el('#btnImportFile').addEventListener('click', ()=> el('#importFile').click());
-  el('#importFile') && el('#importFile').addEventListener('change', e=> { const f = e.target.files[0]; if(!f) return; importTeachersFile(f); e.target.value=''; });
+  load(); bindNav();
+  el('#addTeacher').onclick = addTeacher;
+  el('#addCi').onclick = addCriterion;
+  el('#saveDaily').onclick = ()=> saveGridSession('daily');
+  el('#saveWeekly').onclick = ()=> saveGridSession('weekly');
+  el('#saveMonthly').onclick = ()=> saveGridSession('monthly');
+  el('#saveAttendance').onclick = saveAttendance;
+  el('#saveAbsence').onclick = saveAbsence;
+  el('#clearAttendance').onclick = async()=>{if(await confirmModal('مسح؟')){ state.attendance=[]; save(); renderAttendanceTable(); }};
+  el('#clearAbsence').onclick = async()=>{if(await confirmModal('مسح؟')){ state.absences=[]; save(); renderAbsences(); }};
+  
+  // Reports
+  el('#showReport').onclick = ()=> renderTeacherReport(el('#report_teacher_select').value);
+  el('#btnFilterSummary').onclick = renderSummaryReport;
+  el('#btnFilterFull').onclick = renderFullReport;
+  
+  el('#printReport').onclick = ()=> { renderTeacherReport(el('#report_teacher_select').value); window.print(); };
+  el('#printFull').onclick = ()=> window.print();
+  el('#backup').onclick = ()=> { const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(state)],{type:'application/json'})); a.download='backup.json'; a.click(); };
+  el('#backupTop').onclick = el('#backup').onclick;
+  
+  // RESTORE FIX
+  el('#restore').onclick = () => el('#restoreFile').click();
+  el('#restoreFile').onchange = (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        try {
+            const savedState = JSON.parse(ev.target.result);
+            if(savedState && Array.isArray(savedState.teachers)){
+                state = savedState;
+                save();
+                alert('تم استعادة النسخة بنجاح');
+                location.reload();
+            } else { alert('الملف غير صالح'); }
+        } catch(err) { alert('خطأ في الملف'); }
+    };
+    reader.readAsText(file);
+  };
 
-  el('#exportExcel') && el('#exportExcel').addEventListener('click', ()=> { alert('تصدير Excel غير مفعّل في هذه النسخة المصغرة'); });
-  el('#exportPdf') && el('#exportPdf').addEventListener('click', ()=> { alert('تصدير PDF غير مفعّل في هذه النسخة المصغرة'); });
-
-  bindNav();
-  bindAbsTypeChange();
-
-  renderTeachers(); renderCriteria(); populateSelects(); renderAllTables();
-
-  const first = document.querySelector('.nav-btn[data-screen="teachers"]'); if(first) first.classList.add('active'); show('teachers');
-  toast('مرحباً بك في تطبيق تقييم المعلمين');
+  el('#restoreDefaults').onclick = restoreDefaults;
+  el('#btnImportFile').onclick = ()=> el('#importFile').click();
+  el('#importFile').onchange = e=> importTeachersFile(e.target.files[0]);
+  el('#resetAll').onclick = async()=>{ if(await confirmModal('تصفير شامل؟')){ localStorage.removeItem(STORAGE); location.reload(); } };
+  
+  renderTeachers(); renderCriteria(); populateSelects();
+  el('.nav-btn[data-screen="teachers"]').classList.add('active'); el('#teachers').style.display='block';
 }
 
-/* ---------- Nav & Settings ---------- */
-function bindNav(){ els('.nav-btn').forEach(b=> b.addEventListener('click', ()=>{ els('.nav-btn').forEach(x=> x.classList.remove('active')); b.classList.add('active'); show(b.dataset.screen); })); }
-function show(id){
-  els('.screen').forEach(s=> s.style.display='none');
-  const elc = document.getElementById(id); if(elc) elc.style.display='block';
-  if(id==='teachers') renderTeachers();
-  if(id==='criteria') renderCriteria();
-  if(id==='daily'){ renderGridAndSessions('daily'); }
-  if(id==='weekly'){ renderGridAndSessions('weekly'); }
-  if(id==='monthly'){ renderGridAndSessions('monthly'); }
-  if(id==='attendance'){ renderAttendanceTable(); populateSelects(); }
-  if(id==='absences'){ renderAbsences(); populateSelects(); }
-  if(id==='summaryReport'){ renderSummaryReport(); }
-  if(id==='fullReport') renderFullReport();
-  if(id==='settings') renderSettings();
+function attemptLogin(){
+  const u = el('#login_user').value; const p = el('#login_pass').value;
+  if(u === ADMIN_USER && p === ADMIN_PASS){ el('#loginScreen').style.display = 'none'; el('#appContainer').style.display = 'block'; } else { el('#loginError').style.display = 'block'; }
 }
-
-function renderSettings(){ el('#official_start').value = state.official.start || '07:00'; el('#official_end').value = state.official.end || '13:25'; el('#max_att').value = state.official.maxAttendancePenalty || 2; }
+function doLogout(){ el('#appContainer').style.display = 'none'; el('#loginScreen').style.display = 'flex'; el('#login_user').value = ''; el('#login_pass').value = ''; el('#loginError').style.display = 'none'; }
+function bindNav(){ els('.nav-btn').forEach(b=> b.addEventListener('click', ()=>{ els('.nav-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); els('.screen').forEach(s=>s.style.display='none'); el('#'+b.dataset.screen).style.display='block'; if(['daily','weekly','monthly'].includes(b.dataset.screen)) { buildGridForKind(b.dataset.screen); renderSessions(b.dataset.screen); } if(b.dataset.screen==='summaryReport') renderSummaryReport(); if(b.dataset.screen==='fullReport') renderFullReport(); })); }
 
 document.addEventListener('DOMContentLoaded', init);
-})();
-</script>
-
-
-
-
-
- 
-
-  <!-- Existing system sections are kept below (loaded from original file via JS) -->
-
-  <!-- New: Teacher Detailed Report -->
-  <section id="teacherReport" class="card screen" style="display:block">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-      <div style="flex:1;min-width:220px">
-        <label class="small">اختر معلماً</label>
-        <select id="report_teacher_select"></select>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button id="showReport" class="btn">عرض التقرير</button>
-        <button id="printReport" class="btn ghost">طباعة التقرير (صفحة نظيفة)</button>
-        <button id="downloadPdf" class="btn ghost">تصدير PDF</button>
-      </div>
-    </div>
-
-    <div id="reportContainer" style="margin-top:18px;display:none">
-      <!-- Professional report card -->
-      <div class="report-wrap" id="reportPrintArea">
-        <div class="report-header">
-          <div>
-            <div class="school-info">نظام تقييم المعلمين — المؤسسة التعليمية</div>
-            <div class="report-title" id="r_teacher_name">اسم المعلم</div>
-            <div class="muted" id="r_teacher_meta">الرقم — المادة</div>
-          </div>
-          <div class="kpi" id="r_kpis" style="justify-content:flex-end"></div>
-        </div>
-
-        <div class="section" id="r_summary_section">
-          <h4>الملخص التنفيذي</h4>
-          <div id="r_summary_text" class="muted">ملخص سريع لأداء المعلم، المجموع والنسبة المئوية.</div>
-        </div>
-
-        <div class="section" id="r_details_section">
-          <h4>تفاصيل الأداء حسب البنود</h4>
-          <div id="r_details_tables"></div>
-        </div>
-
-        <div class="section" id="r_att_abs_section">
-          <h4>الحضور والغياب</h4>
-          <div id="r_attendance_table"></div>
-          <div id="r_absence_table" style="margin-top:8px"></div>
-        </div>
-
-        <div class="section" id="r_sessions_section">
-          
-          <div id="r_sessions_list" class="muted"></div>
-        </div>
-
-        <div class="section" id="r_notes_section">
-          
-          <div id="r_notes" class="muted">—</div>
-        </div>
-      </div>
-    </div>
-
-  </section>
-
- 
-</div>
-
-<!-- include original script (trimmed) and add report functions -->
-<script>
-/* ====== تقرير المعلم المفصّل — إضافات على النظام ====== */
-(function(){
-// We'll reuse the original state stored in localStorage by key 'index27_v2_state_v3'
-const STORAGE = 'index27_v2_state_v3';
-let state = {teachers:[], criteria:[], deductions:[], evaluations:[], attendance:[], absences:[], official:{start:'07:00', end:'13:25', maxAttendancePenalty:2}};
-function loadState(){ try{ const raw = localStorage.getItem(STORAGE); if(raw) state = JSON.parse(raw); if(!state.criteria || state.criteria.length===0) state.criteria = []; }catch(e){ console.warn('Không thể tải state', e);} }
-function saveState(){ try{ localStorage.setItem(STORAGE, JSON.stringify(state)); }catch(e){} }
-function el(id){ return document.getElementById(id); }
-function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-loadState();
-
-/* Populate teacher select */
-function populateTeacherSelect(){ const sel = el('report_teacher_select'); if(!sel) return; const prev = sel.value; sel.innerHTML=''; const ph = document.createElement('option'); ph.value=''; ph.textContent='-- اختر --'; sel.appendChild(ph);
-  (state.teachers||[]).forEach(t=>{ const o=document.createElement('option'); o.value=t.id; o.textContent = t.name + (t.subject?(' — '+t.subject):''); sel.appendChild(o); }); sel.value = prev; }
-
-/* Compute per-teacher details reusing logic from original file */
-function computeForTeacher(teacherId){ const crits = state.criteria || []; const perCriterion = crits.map(c=>{
-    const items = (state.deductions||[]).filter(d=> d.teacherId===teacherId && d.criteriaId===c.id && d.kind===c.kind);
-    const totalDed = items.reduce((s,i)=> s + Number(i.deduction||0),0);
-    const final = Math.max(0, c.max - totalDed);
-    return {id:c.id,name:c.name,max:c.max,penalty:c.penalty,totalDed,final,kind:c.kind,items};
-  });
-  const sumCriteriaFinals = perCriterion.reduce((s,p)=> s + p.final,0);
-  const absenceSum = (state.deductions||[]).filter(d=> d.teacherId===teacherId && d.kind==='absence').reduce((s,i)=> s + Number(i.deduction||0),0);
-  const attendanceSum = (state.deductions||[]).filter(d=> d.teacherId===teacherId && d.kind==='attendance').reduce((s,i)=> s + Number(i.deduction||0),0);
-  const totalAfterPenalties = Math.max(0, sumCriteriaFinals - (absenceSum + attendanceSum));
-  const totalPossible = crits.reduce((s,c)=> s + Number(c.max||0),0);
-  const percent = totalPossible ? ( (totalAfterPenalties/totalPossible)*100 ) : 0;
-  // sessions where teacher had deductions
-  const sessions = (state.evaluations||[]).filter(s=> (s.deductionIds||[]).some(id=> { const d = (state.deductions||[]).find(dd=> dd.id===id); return d && d.teacherId===teacherId; }));
-  const attendanceRecords = (state.attendance||[]).filter(a=> a.teacherId===teacherId);
-  const absences = (state.absences||[]).filter(a=> a.teacherId===teacherId);
-  return {perCriterion,sumCriteriaFinals,absenceSum,attendanceSum,totalAfterPenalties,percent,totalPossible,sessions,attendanceRecords,absences};
-}
-
-/* Render the professional report */
-function renderTeacherReport(teacherId){ const teacher = (state.teachers||[]).find(t=> t.id===teacherId); if(!teacher) return alert('اختر معلماً'); const data = computeForTeacher(teacherId);
-  el('reportContainer').style.display='block';
-  el('r_teacher_name').textContent = teacher.name || '-'; 
-  el('r_teacher_meta').textContent = (teacher.id||'') + ' — ' + (teacher.subject||'-');
-  // KPIs
-  const kpis = el('r_kpis'); kpis.innerHTML = '';
-  const kpiItems = [
-    {label:'النتيجة النهائية',value:data.totalAfterPenalties}, 
-    {label:'النسبة',value: data.percent.toFixed(1) + '%'},
-    {label:'خصم الحضور',value: data.attendanceSum},
-    {label:'خصم الغياب',value: data.absenceSum}
-  ];
-  kpiItems.forEach(k=>{ const d=document.createElement('div'); d.className='card-kpi'; d.innerHTML = `<div style="font-weight:900">${escapeHtml(String(k.value))}</div><div class="muted">${escapeHtml(k.label)}</div>`; kpis.appendChild(d); });
-
-  // Summary text
-  el('r_summary_text').textContent = `المجموع بعد الخصومات: ${data.totalAfterPenalties} من أصل ${data.totalPossible} — النسبة: ${data.percent.toFixed(1)}%.`;
-
-  // Details per criterion
-  const details = el('r_details_tables'); details.innerHTML = '';
-  const grouped = {};
-  data.perCriterion.forEach(p=>{ (grouped[p.kind]||(grouped[p.kind]=[])).push(p); });
-  for(const kind of ['daily','weekly','monthly']){
-    const arr = grouped[kind] || [];
-    if(arr.length===0) continue;
-    const sec = document.createElement('div'); sec.className='section'; sec.innerHTML = `<h4>بنود (${kind})</h4>`;
-    const tbl = document.createElement('table'); const thead = document.createElement('thead'); thead.innerHTML = '<tr><th>البند</th><th>الحد الأقصى</th><th>مجموع الخصم</th><th>الناتج</th></tr>'; tbl.appendChild(thead);
-    const tbody = document.createElement('tbody');
-    arr.forEach(p=>{ const tr=document.createElement('tr'); tr.innerHTML = `<td>${escapeHtml(p.name)}</td><td class="center">${p.max}</td><td class="center">${p.totalDed}</td><td class="center">${p.final}</td>`; tbody.appendChild(tr); }); tbl.appendChild(tbody); sec.appendChild(tbl); details.appendChild(sec);
-  }
-
-  // Attendance & Absence
-  const attWrap = el('r_attendance_table'); attWrap.innerHTML = '';
-  if(data.attendanceRecords && data.attendanceRecords.length>0){ const t=document.createElement('table'); t.innerHTML = '<thead><tr><th>التاريخ</th><th>الحضور</th><th>الانصراف</th><th>تأخر (د)</th><th>انصراف مبكر (د)</th><th>خصم</th></tr></thead>';
-    const tb=document.createElement('tbody'); data.attendanceRecords.forEach(a=>{ const tr=document.createElement('tr'); tr.innerHTML = `<td>${a.date}</td><td>${a.arrival}</td><td>${a.leave}</td><td class="center">${a.late||0}</td><td class="center">${a.early||0}</td><td class="center">${a.deduction||0}</td>`; tb.appendChild(tr); }); t.appendChild(tb); attWrap.appendChild(t);} else { attWrap.textContent = 'لا توجد سجلات حضور لهذا المعلم.'; }
-
-  const absWrap = el('r_absence_table'); absWrap.innerHTML = '';
-  if(data.absences && data.absences.length>0){ const t=document.createElement('table'); t.innerHTML = '<thead><tr><th>التاريخ</th><th>النوع</th><th>الخصم</th></tr></thead>';
-    const tb=document.createElement('tbody'); data.absences.forEach(a=>{ const tr=document.createElement('tr'); tr.innerHTML = `<td>${a.date}</td><td>${a.type}</td><td class="center">${a.penalty||0}</td>`; tb.appendChild(tr); }); t.appendChild(tb); absWrap.appendChild(t);} else { absWrap.textContent = 'لا توجد سجلات غياب لهذا المعلم.'; }
-
-  // Sessions list
-  const sessWrap = el('r_sessions_list'); sessWrap.innerHTML = '';
-  if(data.sessions && data.sessions.length>0){ const ul=document.createElement('div'); ul.className='muted'; data.sessions.forEach(s=>{ const ds = new Date(s.date).toLocaleString(); ul.innerHTML += `<div>• جلسة (${s.kind}) — ${ds} — عدد الخصومات في الجلسة: ${s.deductionIds? s.deductionIds.filter(id=> state.deductions.find(d=> d.id===id && d.teacherId===teacherId)).length : 0}</div>`; }); sessWrap.appendChild(ul);} else { sessWrap.textContent = 'لا توجد جلسات مرتبطة بهذا المعلم.'; }
-
-  
-}
-
-/* Print: open clean window with the report HTML for printing */
-function openPrintView(){ const cont = el('reportPrintArea'); if(!cont) return; const win = window.open('', '_blank'); if(!win) return alert('المتصفح منع فتح النوافذ');
-  // Clone report HTML and attach simple styles for print
-  const html = `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>تقرير المعلم</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:Arial,Helvetica,sans-serif;padding:20px;color:#071123} table{width:100%;border-collapse:collapse;margin-top:12px} th,td{padding:8px;border:1px solid #ddd;text-align:right} th{background:#f5f5f5;font-weight:800} h2{margin:0 0 8px 0} .muted{color:#666;font-size:13px}</style></head><body>` + cont.innerHTML + `</body></html>`;
-  win.document.open(); win.document.write(html); win.document.close();
-  // wait a bit then print
-  setTimeout(()=>{ win.focus(); win.print(); },400);
-}
-
-/* Export PDF: uses print dialog; for better PDF you can use browser's Save as PDF */
-function exportPdf(){ openPrintView(); }
-
-/* bindings */
-el('showReport').addEventListener('click', ()=>{ const v = el('report_teacher_select').value; if(!v) return alert('اختر معلماً'); renderTeacherReport(v); });
-el('printReport').addEventListener('click', ()=>{ const v = el('report_teacher_select').value; if(!v) return alert('اختر معلماً'); renderTeacherReport(v); openPrintView(); });
-el('downloadPdf').addEventListener('click', ()=>{ const v = el('report_teacher_select').value; if(!v) return alert('اختر معلماً'); renderTeacherReport(v); exportPdf(); });
-
-/* initial populate */
-populateTeacherSelect();
-
-/* also listen to storage changes so report reflects live data if user edits other tabs */
-window.addEventListener('storage', ()=>{ loadState(); populateTeacherSelect(); });
-
-// if the original app exists on the page (user kept full file) we could call its render functions — this snippet is intentionally self-contained
-
 })();
 </script>
 </body>
